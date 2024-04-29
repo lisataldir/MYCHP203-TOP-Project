@@ -5,7 +5,7 @@ set(CMAKE_COLOR_DIAGNOSTICS ON)
 set(CMAKE_C_STANDARD 17)
 
 if(CMAKE_BUILD_TYPE EQUAL Debug)
-    add_compile_options(-Wall -Wextra -Werror -fsanitize=address)
+    add_compile_options(-Wall -Wextra -Werror -g)
 endif()
 
 find_package(MPI REQUIRED)
