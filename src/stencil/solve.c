@@ -1,6 +1,7 @@
 #include "stencil/solve.h"
 
 #include <assert.h>
+#include <stdio.h>
 // #include <math.h>
 
 f64 square_and_multiply(f64 x, usz n)
@@ -43,28 +44,37 @@ void solve_jacobi(mesh_t* A, mesh_t const* B, mesh_t* C) {
 
     f64 tmp;
 
-    for (usz i = STENCIL_ORDER; i < dim_x - STENCIL_ORDER; ++i) {
-        for (usz j = STENCIL_ORDER; j < dim_y - STENCIL_ORDER; ++j) {
-            for (usz k = STENCIL_ORDER; k < dim_z - STENCIL_ORDER; ++k) {
-                C->cells[i][j][k].value = A->cells[i][j][k].value * B->cells[i][j][k].value;
+    #pragma omp parallel for
+    for (usz i = STENCIL_ORDER; i < dim_x - STENCIL_ORDER; i+=20) {
+        for (usz j = STENCIL_ORDER; j < dim_y - STENCIL_ORDER; j+=20) {
+            for (usz k = STENCIL_ORDER; k < dim_z - STENCIL_ORDER; k+=20) {
 
-                for (usz o = 1; o <= STENCIL_ORDER; ++o) {
+                // Cache blocking
+                for (usz ii = 0; ii < 20; ++ii) {
+                    for (usz jj = 0; jj < 20; ++jj) {
+                        for (usz kk = 0; kk < 20; ++kk) {
+                            C->cells[i+ii][j+jj][k+kk].value = A->cells[i+ii][j+jj][k+kk].value * B->cells[i+ii][j+jj][k+kk].value;
 
-                    tmp = 1 / square_and_multiply(17.0, o);
-                    // tmp = 1/pow(17.0, (f64)o);
+                            for (usz o = 1; o <= STENCIL_ORDER; ++o) {
 
-                    C->cells[i][j][k].value += A->cells[i + o][j][k].value *
-                                               B->cells[i + o][j][k].value * tmp;
-                    C->cells[i][j][k].value += A->cells[i - o][j][k].value *
-                                               B->cells[i - o][j][k].value * tmp;
-                    C->cells[i][j][k].value += A->cells[i][j + o][k].value *
-                                               B->cells[i][j + o][k].value * tmp;
-                    C->cells[i][j][k].value += A->cells[i][j - o][k].value *
-                                               B->cells[i][j - o][k].value * tmp;
-                    C->cells[i][j][k].value += A->cells[i][j][k + o].value *
-                                               B->cells[i][j][k + o].value * tmp;
-                    C->cells[i][j][k].value += A->cells[i][j][k - o].value *
-                                               B->cells[i][j][k - o].value * tmp;
+                                tmp = 1 / square_and_multiply(17.0, o);
+                                // tmp = 1/pow(17.0, (f64)o);
+
+                                C->cells[i+ii][j+jj][k+kk].value += A->cells[i+ii + o][j+jj][k+kk].value *
+                                                        B->cells[i+ii + o][j+jj][k+kk].value * tmp;
+                                C->cells[i+ii][j+jj][k+kk].value += A->cells[i+ii- o][j+jj][k+kk].value *
+                                                        B->cells[i+ii - o][j+jj][k+kk].value * tmp;
+                                C->cells[i+ii][j+jj][k+kk].value += A->cells[i+ii][j+jj + o][k+kk].value *
+                                                        B->cells[i+ii][j+jj + o][k+kk].value * tmp;
+                                C->cells[i+ii][j+jj][k+kk].value += A->cells[i+ii][j+jj - o][k+kk].value *
+                                                        B->cells[i+ii][j+jj - o][k+kk].value * tmp;
+                                C->cells[i+ii][j+jj][k+kk].value += A->cells[i+ii][j+jj][k+kk + o].value *
+                                                        B->cells[i+ii][j+jj][k+kk + o].value * tmp;
+                                C->cells[i+ii][j+jj][k+kk].value += A->cells[i+ii][j+jj][k+kk- o].value *
+                                                        B->cells[i+ii][j+jj][k+kk - o].value * tmp;
+                            }
+                        }
+                    }
                 }
             }
         }
