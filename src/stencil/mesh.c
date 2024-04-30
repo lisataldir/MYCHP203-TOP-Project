@@ -98,14 +98,15 @@ cell_kind_t mesh_set_cell_kind(mesh_t const* self, usz i, usz j, usz k) {
     }
 }
 
+
 void mesh_copy_core(mesh_t* dst, mesh_t const* src) {
     assert(dst->dim_x == src->dim_x);
     assert(dst->dim_y == src->dim_y);
     assert(dst->dim_z == src->dim_z);
 
-    for (usz k = STENCIL_ORDER; k < dst->dim_z - STENCIL_ORDER; ++k) {
+    for (usz i = STENCIL_ORDER; i < dst->dim_x - STENCIL_ORDER; ++i) {
         for (usz j = STENCIL_ORDER; j < dst->dim_y - STENCIL_ORDER; ++j) {
-            for (usz i = STENCIL_ORDER; i < dst->dim_x - STENCIL_ORDER; ++i) {
+            for (usz k = STENCIL_ORDER; k < dst->dim_z - STENCIL_ORDER; ++k) {
                 assert(dst->cells[i][j][k].kind == CELL_KIND_CORE);
                 assert(src->cells[i][j][k].kind == CELL_KIND_CORE);
                 dst->cells[i][j][k].value = src->cells[i][j][k].value;
