@@ -42,12 +42,17 @@ void solve_jacobi(mesh_t* A, mesh_t const* B, mesh_t* C) {
     usz const dim_y = A->dim_y;
     usz const dim_z = A->dim_z;
 
+    f64 o_values[STENCIL_ORDER];
+    for (usz o = 1; o <= STENCIL_ORDER; ++o) {
+      o_values[o - 1] = 1 / square_and_multiply(17.0, o);
+    }
+
     f64 tmp;
 
     usz block_x = 8;
     usz block_y = 8;
     usz block_z = 8;
-    #pragma omp parallel for
+    #pragma omp parallel for schedule (runtime)
     for (usz i = STENCIL_ORDER; i < dim_x - STENCIL_ORDER; i+=block_x) {
         for (usz j = STENCIL_ORDER; j < dim_y - STENCIL_ORDER; j+=block_y) {
             for (usz k = STENCIL_ORDER; k < dim_z - STENCIL_ORDER; k+=block_z) {
@@ -63,22 +68,23 @@ void solve_jacobi(mesh_t* A, mesh_t const* B, mesh_t* C) {
 
                             for (usz o = 1; o <= STENCIL_ORDER; ++o) {
 
-                                tmp = 1 / square_and_multiply(17.0, o);
+                                // tmp = 1 / square_and_multiply(17.0, o);
                                 // tmp = 1/pow(17.0, (f64)o);
 
-                                C->cells[i+ii][j+jj][k+kk].value += A->cells[i+ii + o][j+jj][k+kk].value *
-                                                        B->cells[i+ii + o][j+jj][k+kk].value * tmp;
-                                C->cells[i+ii][j+jj][k+kk].value += A->cells[i+ii- o][j+jj][k+kk].value *
-                                                        B->cells[i+ii - o][j+jj][k+kk].value * tmp;
-                                C->cells[i+ii][j+jj][k+kk].value += A->cells[i+ii][j+jj + o][k+kk].value *
-                                                        B->cells[i+ii][j+jj + o][k+kk].value * tmp;
-                                C->cells[i+ii][j+jj][k+kk].value += A->cells[i+ii][j+jj - o][k+kk].value *
-                                                        B->cells[i+ii][j+jj - o][k+kk].value * tmp;
-                                C->cells[i+ii][j+jj][k+kk].value += A->cells[i+ii][j+jj][k+kk + o].value *
-                                                        B->cells[i+ii][j+jj][k+kk + o].value * tmp;
-                                C->cells[i+ii][j+jj][k+kk].value += A->cells[i+ii][j+jj][k+kk- o].value *
-                                                        B->cells[i+ii][j+jj][k+kk - o].value * tmp;
+                                tmp += A->cells[i+ii + o][j+jj][k+kk].value *
+                                                        B->cells[i+ii + o][j+jj][k+kk].value * o_values[o-1];
+                                tmp += A->cells[i+ii- o][j+jj][k+kk].value *
+                                                        B->cells[i+ii - o][j+jj][k+kk].value * o_values[o-1];
+                                tmp += A->cells[i+ii][j+jj + o][k+kk].value *
+                                                        B->cells[i+ii][j+jj + o][k+kk].value * o_values[o-1];
+                                tmp += A->cells[i+ii][j+jj - o][k+kk].value *
+                                                        B->cells[i+ii][j+jj - o][k+kk].value * o_values[o-1];
+                                tmp += A->cells[i+ii][j+jj][k+kk + o].value *
+                                                        B->cells[i+ii][j+jj][k+kk + o].value * o_values[o-1];
+                                tmp += A->cells[i+ii][j+jj][k+kk- o].value *
+                                                        B->cells[i+ii][j+jj][k+kk - o].value * o_values[o-1];
                             }
+                            C->cells[i+ii][j+jj][k+kk].value = tmp;
                         }
                     }
                 }

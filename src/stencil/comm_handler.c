@@ -230,7 +230,7 @@ void comm_handler_ghost_exchange(comm_handler_t const* self, mesh_t* mesh) {
     ghost_exchange_left_right(self, mesh, COMM_KIND_SEND_OP, self->id_left, STENCIL_ORDER);
     ghost_exchange_left_right(self, mesh, COMM_KIND_RECV_OP, self->id_right, mesh->dim_x - STENCIL_ORDER);
     // Prevent mixing communication from left/right with top/bottom and front/back
-    MPI_Barrier(MPI_COMM_WORLD);
+    // MPI_Barrier(MPI_COMM_WORLD);
 
     // Top to bottom phase
     ghost_exchange_top_bottom(self, mesh, COMM_KIND_SEND_OP, self->id_top, mesh->dim_y - 2 * STENCIL_ORDER);
@@ -239,7 +239,7 @@ void comm_handler_ghost_exchange(comm_handler_t const* self, mesh_t* mesh) {
     ghost_exchange_top_bottom(self, mesh, COMM_KIND_SEND_OP, self->id_bottom, STENCIL_ORDER);
     ghost_exchange_top_bottom(self, mesh, COMM_KIND_RECV_OP, self->id_top, mesh->dim_y - STENCIL_ORDER);
     // Prevent mixing communication from top/bottom with left/right and front/back
-    MPI_Barrier(MPI_COMM_WORLD);
+    // MPI_Barrier(MPI_COMM_WORLD);
 
     // Front to back phase
     ghost_exchange_front_back(self, mesh, COMM_KIND_SEND_OP, self->id_back, mesh->dim_z - 2 * STENCIL_ORDER);
@@ -249,5 +249,5 @@ void comm_handler_ghost_exchange(comm_handler_t const* self, mesh_t* mesh) {
     ghost_exchange_front_back(self, mesh, COMM_KIND_RECV_OP, self->id_back, mesh->dim_z - STENCIL_ORDER);
 
     // Need to synchronize all remaining in-flight communications before exiting
-    MPI_Syncall(MPI_COMM_WORLD);
+    // MPI_Syncall(MPI_COMM_WORLD);
 }
