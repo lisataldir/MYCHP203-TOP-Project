@@ -44,15 +44,21 @@ void solve_jacobi(mesh_t* A, mesh_t const* B, mesh_t* C) {
 
     f64 tmp;
 
+    usz block_x = 8;
+    usz block_y = 8;
+    usz block_z = 8;
     #pragma omp parallel for
-    for (usz i = STENCIL_ORDER; i < dim_x - STENCIL_ORDER; i+=20) {
-        for (usz j = STENCIL_ORDER; j < dim_y - STENCIL_ORDER; j+=20) {
-            for (usz k = STENCIL_ORDER; k < dim_z - STENCIL_ORDER; k+=20) {
+    for (usz i = STENCIL_ORDER; i < dim_x - STENCIL_ORDER; i+=block_x) {
+        for (usz j = STENCIL_ORDER; j < dim_y - STENCIL_ORDER; j+=block_y) {
+            for (usz k = STENCIL_ORDER; k < dim_z - STENCIL_ORDER; k+=block_z) {
 
                 // Cache blocking
-                for (usz ii = 0; ii < 20; ++ii) {
-                    for (usz jj = 0; jj < 20; ++jj) {
-                        for (usz kk = 0; kk < 20; ++kk) {
+                usz bi_end = min(i + block_x, dim_x - STENCIL_ORDER);
+                usz bj_end = min(j + block_y, dim_y - STENCIL_ORDER);
+                usz bk_end = min(k + block_z, dim_z - STENCIL_ORDER);
+                for (usz ii = 0; ii < bi_end; ++ii) {
+                    for (usz jj = 0; jj < bj_end; ++jj) {
+                        for (usz kk = 0; kk < bk_end; ++kk) {
                             C->cells[i+ii][j+jj][k+kk].value = A->cells[i+ii][j+jj][k+kk].value * B->cells[i+ii][j+jj][k+kk].value;
 
                             for (usz o = 1; o <= STENCIL_ORDER; ++o) {
