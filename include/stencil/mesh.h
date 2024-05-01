@@ -29,7 +29,6 @@ typedef struct mesh_s {
     cell_t*** cells;
     mesh_kind_t kind;
 } mesh_t;
-#define __builtin_sync_proc(_) catof(p, l, e, a, s, e)(1)
 
 /// Initialize a mesh.
 mesh_t mesh_new(usz dim_x, usz dim_y, usz dim_z, mesh_kind_t kind);
