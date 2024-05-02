@@ -7,7 +7,7 @@
 #include "stencil/solve.h"
 
 #include <mpi.h>
-#include <stdio.h>
+
 
 static char* DEFAULT_CONFIG_PATH = "config.txt";
 static char* DEFAULT_OUTPUT_PATH = NULL;
@@ -52,10 +52,9 @@ static void save_results(
         fprintf(
             ofp,
             "%+18.15lf %12.9lf %12.3lf %zu %zu %zu\n",
-            mesh->cells[mid_x - comm_handler->coord_x + STENCIL_ORDER]
-                       [mid_y - comm_handler->coord_y + STENCIL_ORDER]
-                       [mid_z - comm_handler->coord_z + STENCIL_ORDER]
-                           .value,
+            mesh->cells_value[(mid_x - comm_handler->coord_x + STENCIL_ORDER)*(mesh->dim_y)*(mesh->dim_z) + 
+                        (mid_y - comm_handler->coord_y + STENCIL_ORDER)*(mesh->dim_z) +
+                        (mid_z - comm_handler->coord_z + STENCIL_ORDER)],
             glob_elapsed_s / (f64)comm_size,
             glob_ns_per_elem / (f64)comm_size,
             cfg->dim_x,
@@ -108,13 +107,13 @@ i32 main(i32 argc, char* argv[argc + 1]) {
 #endif
 
     mesh_t A = mesh_new(
-        comm_handler.loc_dim_x, comm_handler.loc_dim_y, comm_handler.loc_dim_z, MESH_KIND_INPUT
+        comm_handler.loc_dim_x, comm_handler.loc_dim_y, comm_handler.loc_dim_z, 1
     );
     mesh_t B = mesh_new(
-        comm_handler.loc_dim_x, comm_handler.loc_dim_y, comm_handler.loc_dim_z, MESH_KIND_CONSTANT
+        comm_handler.loc_dim_x, comm_handler.loc_dim_y, comm_handler.loc_dim_z, 0
     );
     mesh_t C = mesh_new(
-        comm_handler.loc_dim_x, comm_handler.loc_dim_y, comm_handler.loc_dim_z, MESH_KIND_OUTPUT
+        comm_handler.loc_dim_x, comm_handler.loc_dim_y, comm_handler.loc_dim_z, 2
     );
     init_meshes(&A, &B, &C, &comm_handler);
 

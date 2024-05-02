@@ -125,12 +125,12 @@ static void ghost_exchange_left_right(
                 switch (comm_kind) {
                     case COMM_KIND_SEND_OP:
                         MPI_Send(
-                            &mesh->cells[i][j][k].value, 1, MPI_DOUBLE, target, 0, MPI_COMM_WORLD
+                            &(mesh->cells_value[i*mesh->dim_y*mesh->dim_z + j*mesh->dim_z + k]), 1, MPI_DOUBLE, target, 0, MPI_COMM_WORLD
                         );
                         break;
                     case COMM_KIND_RECV_OP:
                         MPI_Recv(
-                            &mesh->cells[i][j][k].value,
+                            &(mesh->cells_value[i*mesh->dim_y*mesh->dim_z + j*mesh->dim_z + k]),
                             1,
                             MPI_DOUBLE,
                             target,
@@ -160,12 +160,12 @@ static void ghost_exchange_top_bottom(
                 switch (comm_kind) {
                     case COMM_KIND_SEND_OP:
                         MPI_Send(
-                            &mesh->cells[i][j][k].value, 1, MPI_DOUBLE, target, 0, MPI_COMM_WORLD
+                            &mesh->cells_value[i*mesh->dim_y*mesh->dim_z + j*mesh->dim_z + k], 1, MPI_DOUBLE, target, 0, MPI_COMM_WORLD
                         );
                         break;
                     case COMM_KIND_RECV_OP:
                         MPI_Recv(
-                            &mesh->cells[i][j][k].value,
+                            &mesh->cells_value[i*mesh->dim_y*mesh->dim_z + j*mesh->dim_z + k],
                             1,
                             MPI_DOUBLE,
                             target,
@@ -195,12 +195,12 @@ static void ghost_exchange_front_back(
                 switch (comm_kind) {
                     case COMM_KIND_SEND_OP:
                         MPI_Send(
-                            &mesh->cells[i][j][k].value, 1, MPI_DOUBLE, target, 0, MPI_COMM_WORLD
+                            &mesh->cells_value[i*mesh->dim_y*mesh->dim_z + j*mesh->dim_z + k], 1, MPI_DOUBLE, target, 0, MPI_COMM_WORLD
                         );
                         break;
                     case COMM_KIND_RECV_OP:
                         MPI_Recv(
-                            &mesh->cells[i][j][k].value,
+                            &mesh->cells_value[i*mesh->dim_y*mesh->dim_z + j*mesh->dim_z + k],
                             1,
                             MPI_DOUBLE,
                             target,
@@ -246,3 +246,4 @@ void comm_handler_ghost_exchange(comm_handler_t const* self, mesh_t* mesh) {
     // Need to synchronize all remaining in-flight communications before exiting
     MPI_Barrier(MPI_COMM_WORLD);
 }
+
