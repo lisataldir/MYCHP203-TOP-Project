@@ -8,11 +8,11 @@
 #define STENCIL_ORDER 8UL
 
 typedef struct mesh_s {
+    f64* cells_value;
+    i32* cells_kind; // cells_kind == 1 for cells core and 0 for cells phantoms
     usz dim_x;
     usz dim_y;
     usz dim_z;
-    f64* cells_value;
-    i32* cells_kind; // cells_kind == 1 for cells core and 0 for cells phantoms
     i32 mesh_kind; // mesh_kind == 0 if constant, 1 if intput and 2 if output
 } mesh_t;
 

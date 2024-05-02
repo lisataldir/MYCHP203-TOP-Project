@@ -18,11 +18,11 @@ mesh_t mesh_new(usz dim_x, usz dim_y, usz dim_z, i32 mesh_kind) {
     }
 
     return (mesh_t){
+        .cells_value = cells_value,
+        .cells_kind = cells_kind,
         .dim_x = dim_x + ghost_size,
         .dim_y = dim_y + ghost_size,
         .dim_z = dim_z + ghost_size,
-        .cells_value = cells_value,
-        .cells_kind = cells_kind,
         .mesh_kind = mesh_kind,
     };
 }
