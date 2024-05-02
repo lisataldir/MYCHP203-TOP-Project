@@ -121,27 +121,25 @@ static void ghost_exchange_left_right(
 
     for (usz i = x_start; i < x_start + STENCIL_ORDER; ++i) {
         for (usz j = 0; j < mesh->dim_y; ++j) {
-            for (usz k = 0; k < mesh->dim_z; ++k) {
-                switch (comm_kind) {
-                    case COMM_KIND_SEND_OP:
-                        MPI_Send(
-                            &(mesh->cells_value[i*mesh->dim_y*mesh->dim_z + j*mesh->dim_z + k]), 1, MPI_DOUBLE, target, 0, MPI_COMM_WORLD
-                        );
-                        break;
-                    case COMM_KIND_RECV_OP:
-                        MPI_Recv(
-                            &(mesh->cells_value[i*mesh->dim_y*mesh->dim_z + j*mesh->dim_z + k]),
-                            1,
-                            MPI_DOUBLE,
-                            target,
-                            0,
-                            MPI_COMM_WORLD,
-                            MPI_STATUS_IGNORE
-                        );
-                        break;
-                    default:
-                        __builtin_unreachable();
-                }
+            switch (comm_kind) {
+                case COMM_KIND_SEND_OP:
+                    MPI_Send(
+                        &(mesh->cells_value[i*mesh->dim_y*mesh->dim_z + j*mesh->dim_z]), mesh->dim_z, MPI_DOUBLE, target, 0, MPI_COMM_WORLD
+                    );
+                    break;
+                case COMM_KIND_RECV_OP:
+                    MPI_Recv(
+                        &(mesh->cells_value[i*mesh->dim_y*mesh->dim_z + j*mesh->dim_z]),
+                        mesh->dim_z,
+                        MPI_DOUBLE,
+                        target,
+                        0,
+                        MPI_COMM_WORLD,
+                        MPI_STATUS_IGNORE
+                    );
+                    break;
+                default:
+                    __builtin_unreachable();
             }
         }
     }
@@ -156,17 +154,16 @@ static void ghost_exchange_top_bottom(
 
     for (usz i = 0; i < mesh->dim_x; ++i) {
         for (usz j = y_start; j < y_start + STENCIL_ORDER; ++j) {
-            for (usz k = 0; k < mesh->dim_z; ++k) {
                 switch (comm_kind) {
                     case COMM_KIND_SEND_OP:
                         MPI_Send(
-                            &mesh->cells_value[i*mesh->dim_y*mesh->dim_z + j*mesh->dim_z + k], 1, MPI_DOUBLE, target, 0, MPI_COMM_WORLD
+                            &mesh->cells_value[i*mesh->dim_y*mesh->dim_z + j*mesh->dim_z], mesh->dim_z, MPI_DOUBLE, target, 0, MPI_COMM_WORLD
                         );
                         break;
                     case COMM_KIND_RECV_OP:
                         MPI_Recv(
-                            &mesh->cells_value[i*mesh->dim_y*mesh->dim_z + j*mesh->dim_z + k],
-                            1,
+                            &mesh->cells_value[i*mesh->dim_y*mesh->dim_z + j*mesh->dim_z],
+                            mesh->dim_z,
                             MPI_DOUBLE,
                             target,
                             0,
@@ -177,7 +174,6 @@ static void ghost_exchange_top_bottom(
                     default:
                         __builtin_unreachable();
                 }
-            }
         }
     }
 }
@@ -191,17 +187,16 @@ static void ghost_exchange_front_back(
 
     for (usz i = 0; i < mesh->dim_x; ++i) {
         for (usz j = 0; j < mesh->dim_y; ++j) {
-            for (usz k = z_start; k < z_start + STENCIL_ORDER; ++k) {
                 switch (comm_kind) {
                     case COMM_KIND_SEND_OP:
                         MPI_Send(
-                            &mesh->cells_value[i*mesh->dim_y*mesh->dim_z + j*mesh->dim_z + k], 1, MPI_DOUBLE, target, 0, MPI_COMM_WORLD
+                            &mesh->cells_value[i*mesh->dim_y*mesh->dim_z + j*mesh->dim_z + z_start], STENCIL_ORDER, MPI_DOUBLE, target, 0, MPI_COMM_WORLD
                         );
                         break;
                     case COMM_KIND_RECV_OP:
                         MPI_Recv(
-                            &mesh->cells_value[i*mesh->dim_y*mesh->dim_z + j*mesh->dim_z + k],
-                            1,
+                            &mesh->cells_value[i*mesh->dim_y*mesh->dim_z + j*mesh->dim_z + z_start],
+                            STENCIL_ORDER,
                             MPI_DOUBLE,
                             target,
                             0,
@@ -212,7 +207,6 @@ static void ghost_exchange_front_back(
                     default:
                         __builtin_unreachable();
                 }
-            }
         }
     }
 }

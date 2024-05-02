@@ -50,7 +50,7 @@ void solve_jacobi(mesh_t* A, mesh_t const* B, mesh_t* C) {
     f64 o_values[STENCIL_ORDER];
     for (usz o = 1; o <= STENCIL_ORDER; ++o)
     {
-      o_values[o - 1] = 1 / pow(17.0, (f64)o);
+      o_values[o - 1] = 1 / square_and_multiply(17.0, o);
     }
     f64 tmp;
     for (usz i = STENCIL_ORDER; i < dim_x - STENCIL_ORDER; ++i)  {
@@ -77,6 +77,6 @@ void solve_jacobi(mesh_t* A, mesh_t const* B, mesh_t* C) {
             }
         }
     }
-    
+
     mesh_copy_core(A, C);
 }
