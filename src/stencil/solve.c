@@ -53,15 +53,20 @@ void solve_jacobi(mesh_t* A, mesh_t const* B, mesh_t* C) {
   }
 
   f64 tmp;
-  usz block_x = 20;
-  usz block_y = 20;
-  usz block_z = 20;
+  // These block values were determined through experience, it is advised to tune them
+  usz block_x = 64;
+  usz block_y = 4;
+  usz block_z = 128;
 
+#pragma omp parallel default(none) private(tmp) \
+  shared(A, B, C, dim_x, dim_y, dim_z, o_values, block_x, block_y, block_z)
+{
   for (usz i = STENCIL_ORDER; i < dim_x - STENCIL_ORDER; i+=block_x)
   {
-    for (usz j = STENCIL_ORDER; j < dim_y - STENCIL_ORDER; j+=block_y) 
+#pragma omp for schedule (runtime)
+    for (usz j = STENCIL_ORDER; j < dim_y - STENCIL_ORDER; j+=block_y)
     {
-      for (usz k = STENCIL_ORDER; k < dim_z - STENCIL_ORDER; k+=block_z) 
+      for (usz k = STENCIL_ORDER; k < dim_z - STENCIL_ORDER; k+=block_z)
       {
 
         // Cache blocking
@@ -69,11 +74,11 @@ void solve_jacobi(mesh_t* A, mesh_t const* B, mesh_t* C) {
         usz bj_end = (usz)fmin(j + block_y, dim_y - STENCIL_ORDER);
         usz bk_end = (usz)fmin(k + block_z, dim_z - STENCIL_ORDER);
 
-        for (usz ii = i; ii < bi_end; ++ii) 
+        for (usz ii = i; ii < bi_end; ++ii)
         {
-          for (usz jj = j; jj < bj_end; ++jj) 
+          for (usz jj = j; jj < bj_end; ++jj)
           {
-            for (usz kk = k; kk < bk_end; ++kk) 
+            for (usz kk = k; kk < bk_end; ++kk)
             {
               tmp = A->cells_value[ii*dim_y*dim_z + jj*dim_z + kk] * B->cells_value[ii*dim_y*dim_z + jj*dim_z + kk];
 
@@ -99,6 +104,7 @@ void solve_jacobi(mesh_t* A, mesh_t const* B, mesh_t* C) {
       }
     }
   }
+}
 
   mesh_copy_core(A, C);
 }
