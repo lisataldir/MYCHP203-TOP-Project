@@ -47,9 +47,9 @@ comm_handler_t comm_handler_new(u32 rank, u32 comm_size, usz dim_x, usz dim_y, u
     usz const loc_dim_x = (rank_x == nb_x - 1) ? dim_x / nb_x + dim_x % nb_x : dim_x / nb_x;
 
     // Setup position
-    u32 const coord_z = rank_z * (u32)dim_z / nb_z;
-    u32 const coord_y = rank_y * (u32)dim_y / nb_y;
-    u32 const coord_x = rank_x * (u32)dim_x / nb_x;
+    u32 const coord_z = rank_z * (u32)(dim_z / nb_z);
+    u32 const coord_y = rank_y * (u32)(dim_y / nb_y);
+    u32 const coord_x = rank_x * (u32)(dim_x / nb_x);
 
     // Compute neighboor nodes IDs
     i32 const id_left = (rank_x > 0) ? (i32)rank - 1 : -1;
