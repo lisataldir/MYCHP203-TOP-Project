@@ -6,12 +6,6 @@
 f64 square_and_multiply(f64 x, usz n)
 {
   f64 y;
-  // n should be unsigned
-  // if (n < 0)
-  // {
-  //   x = 1 / x;
-  //   n = -n;
-  // }
 
   if (n == 0)
     return 1;
@@ -32,28 +26,23 @@ f64 square_and_multiply(f64 x, usz n)
   return x * y;
 }
 
-void solve_jacobi(mesh_t* A, mesh_t const* B, mesh_t* C) {
-  assert(A->dim_x == B->dim_x && B->dim_x == C->dim_x);
-  assert(A->dim_y == B->dim_y && B->dim_y == C->dim_y);
-  assert(A->dim_z == B->dim_z && B->dim_z == C->dim_z);
+void solve_jacobi(mesh_t *restrict A, mesh_t const *restrict B, mesh_t *restrict C) {
+    assert(A->dim_x == B->dim_x && B->dim_x == C->dim_x);
+    assert(A->dim_y == B->dim_y && B->dim_y == C->dim_y);
+    assert(A->dim_z == B->dim_z && B->dim_z == C->dim_z);
 
-  usz const dim_x = A->dim_x;
-  usz const dim_y = A->dim_y;
-  usz const dim_z = A->dim_z;
+    usz const dim_x = A->dim_x;
+    usz const dim_y = A->dim_y;
+    usz const dim_z = A->dim_z;
 
-  // f64 o_values[STENCIL_ORDER]
-  // for (usz o = 1; o <= STENCIL_ORDER; ++o) {
-  //   o_values[o - 1] = 1 / square_and_multiply(17.0, o);
-  // }
-
-  f64 o_values[STENCIL_ORDER];
-  for (usz o = 1; o <= STENCIL_ORDER; ++o)
-  {
-    o_values[o - 1] = 1 / square_and_multiply(17.0, o);
-  }
-
-  f64 tmp;
-  // These block values were determined through experience, it is advised to tune them
+    f64 o_values[STENCIL_ORDER];
+    for (usz o = 1; o <= STENCIL_ORDER; ++o)
+    {
+      o_values[o - 1] = 1 / square_and_multiply(17.0, (f64)o);
+    }
+    f64 tmp;
+    f64 o_value;
+// These block values were determined through experience, it is advised to tune them
   usz block_x = 64;
   usz block_y = 4;
   usz block_z = 128;
@@ -82,8 +71,9 @@ void solve_jacobi(mesh_t* A, mesh_t const* B, mesh_t* C) {
             {
               tmp = A->cells_value[ii*dim_y*dim_z + jj*dim_z + kk] * B->cells_value[ii*dim_y*dim_z + jj*dim_z + kk];
 
+              #pragma omp simd reduction(+:tmp)
               for (usz o = 1; o <= STENCIL_ORDER; ++o) {
-
+                o_value = o_values[o - 1];
                 tmp += A->cells_value[(ii+o)*dim_y*dim_z + jj*dim_z + kk] *
                        B->cells_value[(ii+o)*dim_y*dim_z + jj*dim_z + kk] * o_values[o-1];
                 tmp += A->cells_value[(ii-o)*dim_y*dim_z + jj*dim_z + kk] *
@@ -105,6 +95,5 @@ void solve_jacobi(mesh_t* A, mesh_t const* B, mesh_t* C) {
     }
   }
 }
-
   mesh_copy_core(A, C);
 }
