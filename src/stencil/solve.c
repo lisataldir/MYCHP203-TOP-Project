@@ -41,11 +41,6 @@ void solve_jacobi(mesh_t* A, mesh_t const* B, mesh_t* C) {
   usz const dim_y = A->dim_y;
   usz const dim_z = A->dim_z;
 
-  // f64 o_values[STENCIL_ORDER]
-  // for (usz o = 1; o <= STENCIL_ORDER; ++o) {
-  //   o_values[o - 1] = 1 / square_and_multiply(17.0, o);
-  // }
-
   f64 o_values[STENCIL_ORDER];
   for (usz o = 1; o <= STENCIL_ORDER; ++o)
   {
@@ -53,12 +48,14 @@ void solve_jacobi(mesh_t* A, mesh_t const* B, mesh_t* C) {
   }
 
   f64 tmp;
-  // These block values were determined through experience, it is advised to tune them
-  usz block_x = 64;
-  usz block_y = 4;
-  usz block_z = 128;
+  f64 o_value;
 
-#pragma omp parallel default(none) private(tmp) \
+  // These block values were determined through experience, it is advised to tune them
+  usz block_x = 58;
+  usz block_y = 4;
+  usz block_z = 116;
+
+#pragma omp parallel default(none) private(tmp, o_value) \
   shared(A, B, C, dim_x, dim_y, dim_z, o_values, block_x, block_y, block_z)
 {
   for (usz i = STENCIL_ORDER; i < dim_x - STENCIL_ORDER; i+=block_x)
@@ -83,19 +80,19 @@ void solve_jacobi(mesh_t* A, mesh_t const* B, mesh_t* C) {
               tmp = A->cells_value[ii*dim_y*dim_z + jj*dim_z + kk] * B->cells_value[ii*dim_y*dim_z + jj*dim_z + kk];
 
               for (usz o = 1; o <= STENCIL_ORDER; ++o) {
-
+                o_value = o_values[o - 1];
                 tmp += A->cells_value[(ii+o)*dim_y*dim_z + jj*dim_z + kk] *
-                       B->cells_value[(ii+o)*dim_y*dim_z + jj*dim_z + kk] * o_values[o-1];
+                       B->cells_value[(ii+o)*dim_y*dim_z + jj*dim_z + kk] * o_value;
                 tmp += A->cells_value[(ii-o)*dim_y*dim_z + jj*dim_z + kk] *
-                       B->cells_value[(ii-o)*dim_y*dim_z + jj*dim_z + kk] * o_values[o-1];
+                       B->cells_value[(ii-o)*dim_y*dim_z + jj*dim_z + kk] * o_value;
                 tmp += A->cells_value[ii*dim_y*dim_z + (jj+o)*dim_z + kk] *
-                       B->cells_value[ii*dim_y*dim_z + (jj+o)*dim_z + kk] * o_values[o-1];
+                       B->cells_value[ii*dim_y*dim_z + (jj+o)*dim_z + kk] * o_value;
                 tmp += A->cells_value[ii*dim_y*dim_z + (jj-o)*dim_z + kk] *
-                       B->cells_value[ii*dim_y*dim_z + (jj-o)*dim_z + kk] * o_values[o-1];
+                       B->cells_value[ii*dim_y*dim_z + (jj-o)*dim_z + kk] * o_value;
                 tmp += A->cells_value[ii*dim_y*dim_z + jj*dim_z + (kk+o)] *
-                       B->cells_value[ii*dim_y*dim_z + jj*dim_z + (kk+o)] * o_values[o-1];
+                       B->cells_value[ii*dim_y*dim_z + jj*dim_z + (kk+o)] * o_value;
                 tmp += A->cells_value[ii*dim_y*dim_z + jj*dim_z + (kk-o)] *
-                       B->cells_value[ii*dim_y*dim_z + jj*dim_z + (kk-o)] * o_values[o-1];
+                       B->cells_value[ii*dim_y*dim_z + jj*dim_z + (kk-o)] * o_value;
               }
               C->cells_value[ii*dim_y*dim_z + jj*dim_z + kk] = tmp;
             }
@@ -104,7 +101,6 @@ void solve_jacobi(mesh_t* A, mesh_t const* B, mesh_t* C) {
       }
     }
   }
-}
-
   mesh_copy_core(A, C);
+}
 }
