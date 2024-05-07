@@ -16,13 +16,22 @@ mpi_sum = np.array(mpi_sum)
 
 # Plot
 fig, ax = plt.subplots()
-ax.plot(x_mpi, mpi_sum, marker='*', color='navy', label='Accélération mesurée')
-ax.plot(x_mpi, mpi_sum[0]*np.ones(8), linestyle='--', color='#cb3717', label='Accélération idéale')
+ax.plot(x_mpi, mpi_sum, marker='*', color='navy', label='Temps mesuré')
+ax.plot(x_mpi, mpi_sum[0]*np.ones(8), linestyle='--', color='#cb3717', label='Temps idéal')
 ax.set_xlabel("Nombre de processus MPI")
 ax.set_ylabel('Temps (en ms)')
 ax.legend()
 ax.grid(True)
-plt.savefig(f'weak_scalability_init.png')
+plt.savefig(f'weak_scalability_init_0.png')
+
+fig, ax = plt.subplots()
+ax.plot(x_mpi, mpi_sum[0]/mpi_sum, marker='*', color='navy', label='Accélération mesurée')
+ax.plot(x_mpi, np.ones(8), linestyle='--', color='#cb3717', label='Accélération idéale')
+ax.set_xlabel("Nombre de processus MPI")
+ax.set_ylabel('Accélération')
+ax.legend()
+ax.grid(True)
+plt.savefig(f'weak_scalability_init_1.png')
 
 # On récupère les données mpi après retrait de la barriere
 mpi_sum3 = []
@@ -36,13 +45,22 @@ mpi_sum3 = np.array(mpi_sum3)
 
 # Plot
 fig, ax = plt.subplots()
-ax.plot(x_omp, mpi_sum3, marker='*', color='navy', label='Accélération mesurée')
-ax.plot(x_omp, mpi_sum3[0]*np.ones(5), linestyle='--', color='#cb3717', label='Accélération idéale')
+ax.plot(x_omp, mpi_sum3, marker='*', color='navy', label='Temps mesurée')
+ax.plot(x_omp, mpi_sum3[0]*np.ones(5), linestyle='--', color='#cb3717', label='Temps idéal')
 ax.set_xlabel("Nombre de processus MPI")
 ax.set_ylabel('Temps (en ms)')
 ax.legend()
 ax.grid(True)
-plt.savefig(f'weak_scalability_final.png')
+plt.savefig(f'weak_scalability_final_0.png')
+
+fig, ax = plt.subplots()
+ax.plot(x_omp, mpi_sum3[0]/mpi_sum3, marker='*', color='navy', label='Accélération mesurée')
+ax.plot(x_omp, np.ones(5), linestyle='--', color='#cb3717', label='Accélération idéale')
+ax.set_xlabel("Nombre de processus MPI")
+ax.set_ylabel('Accélération')
+ax.legend()
+ax.grid(True)
+plt.savefig(f'weak_scalability_final_1.png')
 
 
 # On récupère les données omp v0
@@ -58,8 +76,8 @@ ideal_omp = omp_med[0] / x_omp
 
 # Plot
 fig, ax = plt.subplots()
-ax.plot(x_omp, omp_med, marker='*', color='navy', label='Accélération mesurée')
-ax.plot(x_omp, ideal_omp, linestyle='--', color='#cb3717', label='Accélération idéale')
+ax.plot(x_omp, omp_med, marker='*', color='navy', label='Temps mesuré')
+ax.plot(x_omp, ideal_omp, linestyle='--', color='#cb3717', label='Temps idéal')
 ax.set_xlabel('Nombre de threads OpenMP')
 ax.set_ylabel('Temps (en ms)')
 ax.set_title('Strong scalability après parallélisation de solve_jacobi()')
@@ -91,8 +109,8 @@ omp_med2 = np.array(omp_med)
 
 # Plot
 fig, ax = plt.subplots()
-ax.plot(x_omp, omp_med2, marker='*', color='navy', label='Accélération mesurée')
-ax.plot(x_omp, ideal_omp, linestyle='--', color='#cb3717', label='Accélération idéale')
+ax.plot(x_omp, omp_med2, marker='*', color='navy', label='Temps mesuré')
+ax.plot(x_omp, ideal_omp, linestyle='--', color='#cb3717', label='Temps idéal')
 ax.set_xlabel('Nombre de threads OpenMP')
 ax.set_ylabel('Temps (en ms)')
 ax.set_title('Strong scalability après parallélisation de mesh_copy_core()')
