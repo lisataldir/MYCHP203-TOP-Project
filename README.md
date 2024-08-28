@@ -1,10 +1,7 @@
 # MYCHP203-TOP-Project : Seismic core - 3D stencil optimization
 
-Ce projet a été réalisé par Martin Diamant et Lisa Taldir.
 
-## Utilisation
-
-Pour exécuter `top-stencil`, se placer dans le répertoire courant puis faire :
+## Usage
 
 ```bash
 $ mkdir build
@@ -14,3 +11,8 @@ $ make
 $ cd ..
 $ build/top-stencil
 ```
+
+## Contributors
+
+[Martin Diamant](https://github.com/uvsq22005823)   
+[Lisa Taldir](https://github.com/lisataldir)  
